@@ -16,9 +16,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // 1️⃣ Get appointments for a doctor within a time range
     @Query("""
-        SELECT a FROM Appointment a
+        SELECT DISTINCT a FROM Appointment a
         LEFT JOIN FETCH a.doctor d
-        LEFT JOIN FETCH d.availability
+        LEFT JOIN FETCH d.availableTimes
         WHERE d.id = :doctorId
         AND a.appointmentTime BETWEEN :start AND :end
     """)
@@ -31,7 +31,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // 2️⃣ Filter by doctor + patient name (ignore case) + time range
     @Query("""
-        SELECT a FROM Appointment a
+        SELECT DISTINCT a FROM Appointment a
         LEFT JOIN FETCH a.doctor d
         LEFT JOIN FETCH a.patient p
         WHERE d.id = :doctorId

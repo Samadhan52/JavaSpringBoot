@@ -1,9 +1,7 @@
 package com.project.back_end.services;
+import io.jsonwebtoken.security.Keys;
 
-import java.security.Key;
 import java.util.Date;
-
-import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +16,6 @@ import com.project.back_end.repo.PatientRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 
 @Component
 public class TokenService {
@@ -38,74 +35,52 @@ public class TokenService {
         this.patientRepository = patientRepository;
     }
 
-    /* ============================================================
-       GET SIGNING KEY
-       ============================================================ */
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
-    }
-
-    /* ============================================================
-       GENERATE TOKEN (7 DAYS VALIDITY)
-       ============================================================ */
+    /* ===================== GENERATE TOKEN ===================== */
     public String generateToken(String identifier, String role) {
 
     long expirationTime = 1000 * 60 * 60 * 24 * 7;
 
     return Jwts.builder()
-            .setSubject(identifier)
+            .subject(identifier)
             .claim("role", role)
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + expirationTime))
+            .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
             .compact();
 }
 
-
-    /* ============================================================
-       EXTRACT IDENTIFIER (EMAIL / USERNAME)
-       ============================================================ */
+    /* ===================== EXTRACT IDENTIFIER ===================== */
     public String extractIdentifier(String token) {
 
-        Claims claims = Jwts.parserBuilder()
-        .setSigningKey(getSigningKey())
-        .build()
-        .parseClaimsJws(token)
-        .getBody();
+    Claims claims = Jwts.parser()
+            .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+
+    return claims.getSubject();
+}
 
 
-
-        return claims.getSubject();
-    }
-
-    /* ============================================================
-       VALIDATE TOKEN
-       ============================================================ */
+    /* ===================== VALIDATE TOKEN ===================== */
     public boolean validateToken(String token, String user) {
 
         try {
             String identifier = extractIdentifier(token);
 
             switch (user.toLowerCase()) {
-
                 case "admin":
-                    Admin admin = adminRepository.findByUsername(identifier);
-                    return admin != null;
-
+                    return adminRepository.findByUsername(identifier) != null;
                 case "doctor":
-                    Doctor doctor = doctorRepository.findByEmail(identifier);
-                    return doctor != null;
-
+                    return doctorRepository.findByEmail(identifier) != null;
                 case "patient":
-                    Patient patient = patientRepository.findByEmail(identifier);
-                    return patient != null;
-
+                    return patientRepository.findByEmail(identifier) != null;
                 default:
                     return false;
             }
 
         } catch (Exception e) {
-            return false; // invalid or expired token
+            return false;
         }
     }
 }

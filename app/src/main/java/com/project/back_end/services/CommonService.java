@@ -46,17 +46,18 @@ public class CommonService {
     /* ============================================================
        VALIDATE TOKEN
        ============================================================ */
-    public ResponseEntity<Map<String, String>> validateToken(String token, String user) {
+       public ResponseEntity<Map<String, String>> validateToken(String token, String role) {
 
         Map<String, String> response = new HashMap<>();
-
-        if (!tokenService.validateToken(token, user)) {
+    
+        if (!tokenService.validateToken(token, role)) {
             response.put("message", "Invalid or expired token");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-
-        return ResponseEntity.ok().build();
+    
+        return null;  // token valid
     }
+    
 
     /* ============================================================
        VALIDATE ADMIN LOGIN

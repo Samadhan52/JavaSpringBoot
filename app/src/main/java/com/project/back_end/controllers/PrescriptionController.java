@@ -11,7 +11,7 @@ import com.project.back_end.services.PrescriptionService;
 import com.project.back_end.services.CommonService;
 
 @RestController
-@RequestMapping("${api.path}" + "prescription")
+@RequestMapping("/prescription")
 public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
@@ -23,22 +23,16 @@ public class PrescriptionController {
         this.commonService = commonService;
     }
 
-    /* ============================================================
-       1️⃣ SAVE PRESCRIPTION
-       ============================================================ */
     @PostMapping("/{token}")
-    public ResponseEntity<Map<String, String>> savePrescription(
+    public ResponseEntity<?> savePrescription(
             @PathVariable String token,
             @RequestBody Prescription prescription) {
 
-        // validate doctor token
-        Map<String, String> validationResult =
+        ResponseEntity<Map<String, String>> validationResult =
                 commonService.validateToken(token, "doctor");
 
-        // if map NOT empty → token invalid
-        if (!validationResult.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(validationResult);
+        if (!validationResult.getStatusCode().is2xxSuccessful()) {
+            return validationResult;
         }
 
         boolean saved = prescriptionService.savePrescription(prescription);
@@ -52,21 +46,16 @@ public class PrescriptionController {
                 .body(Map.of("message", "Unable to save prescription"));
     }
 
-    /* ============================================================
-       2️⃣ GET PRESCRIPTION
-       ============================================================ */
     @GetMapping("/{appointmentId}/{token}")
     public ResponseEntity<?> getPrescription(
             @PathVariable Long appointmentId,
             @PathVariable String token) {
 
-        // validate doctor token
-        Map<String, String> validationResult =
+        ResponseEntity<Map<String, String>> validationResult =
                 commonService.validateToken(token, "doctor");
 
-        if (!validationResult.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(validationResult);
+        if (!validationResult.getStatusCode().is2xxSuccessful()) {
+            return validationResult;
         }
 
         Prescription prescription =

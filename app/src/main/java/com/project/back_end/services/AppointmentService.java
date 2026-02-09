@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
 
 import com.project.back_end.models.Appointment;
 import com.project.back_end.models.Doctor;
@@ -110,34 +111,38 @@ public class AppointmentService {
        4. GET APPOINTMENTS FOR DOCTOR BY DATE
        ============================================================ */
 
-    public Map<String, Object> getAppointment(String pname,
-                                          LocalDate date,
-                                          String token) {
+       public ResponseEntity<?> getAppointment(
+        String patientName,
+        LocalDate date,
+        String token) {
 
-    Map<String, Object> result = new HashMap<>();
+    String email = tokenService.extractIdentifier(token);
+    Doctor doctor = doctorRepository.findByEmail(email);
 
-    // ✅ Validate doctor token (boolean)
-    if (!tokenService.validateToken(token, "doctor")) {
-        result.put("appointments", Collections.emptyList());
-        return result;
+    if (doctor == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Unauthorized"));
     }
+
+    Long doctorId = doctor.getId();   // ✅ THIS WAS MISSING
 
     LocalDateTime start = date.atStartOfDay();
     LocalDateTime end = date.atTime(23, 59, 59);
 
     List<Appointment> appointments;
 
-    if (pname != null && !pname.equalsIgnoreCase("null")) {
+    if (patientName != null && !patientName.isBlank()) {
         appointments =
                 appointmentRepository
-                        .findByPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(
-                                pname, start, end);
+                        .findByDoctorIdAndPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(
+                                doctorId, patientName, start, end);
     } else {
         appointments =
                 appointmentRepository
-                        .findByAppointmentTimeBetween(start, end);
+                        .findByDoctorIdAndAppointmentTimeBetween(
+                                doctorId, start, end);
     }
 
-    result.put("appointments", appointments);
-    return result;
+    return ResponseEntity.ok(Map.of("appointments", appointments));
+}
 }
