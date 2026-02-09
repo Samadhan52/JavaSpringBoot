@@ -1,6 +1,7 @@
 <!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <!-- Meta -->
     <meta charset="UTF-8">
@@ -23,37 +24,37 @@
 </head>
 
 <body>
-    <main>
-        <div class="container">
-            <div class="wrapper">
 
-                <!-- Header Placeholder -->
-                <div id="header"></div>
+    <div class="container">
+        <div class="wrapper">
 
-                <!-- Main Content -->
-                <main class="main-content">
-                    <h2>Select Your Role</h2>
+            <!-- Header Placeholder -->
+            <div id="header"></div>
 
-                    <div class="role-buttons">
-                        <button id="adminBtn" onclick="selectRole('ADMIN')">
-                            Admin
-                        </button>
+            <!-- Main Content -->
+            <main class="main-content">
+                <h2>Select Your Role</h2>
 
-                        <button id="doctorBtn" onclick="selectRole('DOCTOR')">
-                            Doctor
-                        </button>
+                <div class="role-buttons">
+                    <button id="adminBtn" onclick="selectRole('admin')">
+                        Admin
+                    </button>
 
-                        <button id="patientBtn" onclick="selectRole('PATIENT')">
-                            Patient
-                        </button>
-                    </div>
-                </main>
+                    <button id="doctorBtn" onclick="selectRole('doctor')">
+                        Doctor
+                    </button>
 
-                <!-- Footer Placeholder -->
-                <div id="footer"></div>
-            </div>
+                    <button id="patientBtn" onclick="selectRole('patient')">
+                        Patient
+                    </button>
+                </div>
+            </main>
+
+            <!-- Footer Placeholder -->
+            <div id="footer"></div>
+
         </div>
-    </main>
+    </div>
 
     <!-- Modal -->
     <div id="modal" class="modal hidden">
@@ -65,5 +66,7 @@
 
     <!-- Page Logic -->
     <script type="module" src="./js/services/index.js" defer></script>
+
 </body>
+
 </html>
