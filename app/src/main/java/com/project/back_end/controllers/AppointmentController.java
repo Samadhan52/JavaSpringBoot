@@ -51,12 +51,15 @@ public class AppointmentController {
 
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "patient");
-
+                
         if (tokenValidation != null) {
             return tokenValidation;
         }
 
         int validation = commonService.validateAppointment(appointment);
+        System.out.println("Doctor ID: " + appointment.getDoctor().getId());
+System.out.println("Patient ID: " + appointment.getPatient().getId());
+System.out.println("Time: " + appointment.getAppointmentTime());
 
         if (validation == -1) {
             return ResponseEntity.badRequest()

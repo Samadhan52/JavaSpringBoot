@@ -131,6 +131,7 @@ public class CommonService {
        VALIDATE APPOINTMENT
        ============================================================ */
     public int validateAppointment(Appointment appointment) {
+        
 
         Optional<Doctor> doctorOpt =
                 doctorRepository.findById(appointment.getDoctor().getId());
@@ -145,13 +146,24 @@ public class CommonService {
                 doctorService.getDoctorAvailability(doctorOpt.get().getId(), date);
 
         String requestedTime =
-                appointment.getAppointmentTime().toLocalTime().toString();
+    appointment.getAppointmentTime()
+               .toLocalTime()
+               .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
 
-        if (availableSlots.contains(requestedTime)) {
-            return 1; // valid
-        }
+               System.out.println("Available slots: " + availableSlots);
+               System.out.println("Requested time: " + requestedTime);
 
-        return 0; // unavailable
+        for (String slot : availableSlots) {
+
+    String startTime = slot.split("-")[0]; // take 10:00 from 10:00-11:00
+
+    if (startTime.equals(requestedTime)) {
+        return 1; // valid slot
+    }
+}
+
+return 0; // unavailable
+
     }
 
     /* ============================================================

@@ -60,28 +60,42 @@ export function showBookingOverlay(e, doctor, patient) {
   setTimeout(() => modalApp.classList.add("active"), 600);
 
   modalApp.querySelector(".confirm-booking").addEventListener("click", async () => {
-    const date = modalApp.querySelector("#appointment-date").value;
-    const time = modalApp.querySelector("#appointment-time").value;
-    const token = localStorage.getItem("token");
-    const startTime = time.split('-')[0];
-    const appointment = {
-      doctor: { id: doctor.id },
-      patient: { id: patient.id },
-      appointmentTime: `${date}T${startTime}:00`,
-      status: 0
-    };
+  const date = modalApp.querySelector("#appointment-date").value;
+  const time = modalApp.querySelector("#appointment-time").value;
+  const token = localStorage.getItem("token");
+  const startTime = time.split('-')[0];
 
+  const now = new Date();
+  const selectedDateTime = new Date(`${date}T${startTime}:00`);
 
-    const { success, message } = await bookAppointment(appointment, token);
+  if (!date || !time) {
+    alert("Please select date and time");
+    return;
+  }
 
-    if (success) {
-      alert("Appointment Booked successfully");
-      ripple.remove();
-      modalApp.remove();
-    } else {
-      alert("❌ Failed to book an appointment :: " + message);
-    }
-  });
+  if (selectedDateTime <= now) {
+    alert("Please select a future date and time");
+    return;
+  }
+
+  const appointment = {
+    doctor: { id: doctor.id },
+    patient: { id: patient.id },
+    appointmentTime: `${date}T${startTime}:00`,
+    status: 0
+  };
+
+  const { success, message } = await bookAppointment(appointment, token);
+
+  if (success) {
+    alert("Appointment Booked successfully");
+    ripple.remove();
+    modalApp.remove();
+  } else {
+    alert("❌ Failed to book an appointment :: " + message);
+  }
+});
+
 }
 
 
