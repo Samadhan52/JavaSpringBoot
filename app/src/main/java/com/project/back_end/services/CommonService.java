@@ -214,33 +214,40 @@ return 0; // unavailable
        FILTER PATIENT APPOINTMENTS
        ============================================================ */
     public ResponseEntity<Map<String, Object>> filterPatient(String condition,
-                                                             String name,
-                                                             String token) {
+                                                         String name,
+                                                         String token) {
 
-        String email = tokenService. extractIdentifier(token);
+    String email = tokenService.extractIdentifier(token);
+    Patient patient = patientRepository.findByEmail(email);
 
-        Patient patient = patientRepository.findByEmail(email);
-
-        if (patient == null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Unauthorized");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-
-        Long patientId = patient.getId();
-
-        if (condition != null && name != null) {
-            return patientService.filterByDoctorAndCondition(condition, name, patientId);
-        }
-
-        if (condition != null) {
-            return patientService.filterByCondition(condition, patientId);
-        }
-
-        if (name != null) {
-            return patientService.filterByDoctor(name, patientId);
-        }
-
-        return patientService.getPatientAppointment(patientId, token);
+    if (patient == null) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Unauthorized");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
+
+    Long patientId = patient.getId();
+
+    // ✅ Convert "null" or "all" to real null
+    if ("null".equalsIgnoreCase(condition) || "all".equalsIgnoreCase(condition))
+        condition = null;
+
+    if ("null".equalsIgnoreCase(name) || "all".equalsIgnoreCase(name))
+        name = null;
+
+    // Now correct routing
+    if (condition != null && name != null) {
+        return patientService.filterByDoctorAndCondition(condition, name, patientId);
+    }
+
+    if (condition != null) {
+        return patientService.filterByCondition(condition, patientId);
+    }
+
+    if (name != null) {
+        return patientService.filterByDoctor(name, patientId);
+    }
+
+    return patientService.getPatientAppointment(patientId, token);
+}
 }

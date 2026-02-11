@@ -101,15 +101,10 @@ export async function getPatientData(token) {
    GET PATIENT APPOINTMENTS
    Works for both Doctor & Patient dashboards
    ===================================================== */
-export async function getPatientAppointments(id, token, user) {
+export async function getPatientAppointments(id, token) {
   try {
     const response = await fetch(
-      `${PATIENT_API}/${id}/${user}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
+      `${PATIENT_API}/${id}/${token}`,
     );
 
     const data = await response.json();
@@ -131,30 +126,29 @@ export async function getPatientAppointments(id, token, user) {
    FILTER APPOINTMENTS
    Filters by condition and patient name
    ===================================================== */
-export async function filterAppointments(condition = "", name = "", token) {
-  try {
-    const response = await fetch(
-      `${PATIENT_API}/filter/${condition}/${name}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+   export async function filterAppointments(condition = null, name = null, token) {
+    try {
+      const safeCondition = condition ? condition : "null";
+      const safeName = name ? name : "null";
+  
+      const response = await fetch(
+        `${PATIENT_API}/filter/${safeCondition}/${safeName}/${token}`,
+        {
+          method: "GET"
         }
+      );
+  
+      if (!response.ok) {
+        console.error("Failed to filter appointments");
+        return [];
       }
-    );
-
-    if (!response.ok) {
-      console.error("Failed to filter appointments");
+  
+      const data = await response.json();
+      return data.appointments || [];
+  
+    } catch (error) {
+      console.error("Filter error:", error);
       return [];
     }
-
-    const data = await response.json();
-    return data.appointments || [];
-
-  } catch (error) {
-    console.error("Filter error:", error);
-    alert("Something went wrong while filtering appointments.");
-    return [];
   }
-}
+  

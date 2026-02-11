@@ -19,10 +19,13 @@ async function initializePage() {
 
     patientId = Number(patient.id);
 
-    const appointmentData = await getPatientAppointments(patientId, token, "patient") || [];
+    const appointmentData = await getPatientAppointments(patientId, token) || [];
+
+    // Store all appointments
     allAppointments = appointmentData.filter(app => app.patientId === patientId);
 
     renderAppointments(allAppointments);
+
   } catch (error) {
     console.error("Error loading appointments:", error);
     alert("❌ Failed to load your appointments.");
@@ -32,29 +35,35 @@ async function initializePage() {
 function renderAppointments(appointments) {
   tableBody.innerHTML = "";
 
-  const actionTh = document.querySelector("#patientTable thead tr th:last-child");
-  if (actionTh) {
-    actionTh.style.display = "table-cell"; // Always show "Actions" column
-  }
-
-  if (!appointments.length) {
-    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No Appointments Found</td></tr>`;
+  if (!appointments || appointments.length === 0) {
+    tableBody.innerHTML =
+      `<tr><td colspan="5" style="text-align:center;">No Appointments Found</td></tr>`;
     return;
   }
 
   appointments.forEach(appointment => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${appointment.patientName || "You"}</td>
       <td>${appointment.doctorName}</td>
       <td>${appointment.appointmentDate}</td>
       <td>${appointment.appointmentTimeOnly}</td>
-      <td>${appointment.status == 0 ? `<img src="../assets/images/edit/edit.png" alt="Edit" class="prescription-btn" data-id="${appointment.patientId}">` : "-"}</td>
+      <td>
+        ${
+          appointment.status == 0
+            ? `<img src="../assets/images/edit/edit.png"
+                 alt="Edit"
+                 class="edit-btn"
+                 style="cursor:pointer;">`
+            : "-"
+        }
+      </td>
     `;
 
     if (appointment.status == 0) {
-      const actionBtn = tr.querySelector(".prescription-btn");
-      actionBtn?.addEventListener("click", () => redirectToUpdatePage(appointment));
+      tr.querySelector(".edit-btn")
+        ?.addEventListener("click", () => redirectToUpdatePage(appointment));
     }
 
     tableBody.appendChild(tr);
@@ -62,7 +71,6 @@ function renderAppointments(appointments) {
 }
 
 function redirectToUpdatePage(appointment) {
-  // Prepare the query parameters
   const queryString = new URLSearchParams({
     appointmentId: appointment.id,
     patientId: appointment.patientId,
@@ -73,33 +81,52 @@ function redirectToUpdatePage(appointment) {
     appointmentTime: appointment.appointmentTimeOnly,
   }).toString();
 
-  // Redirect to the update page with the query string
-  setTimeout(() => {
-    window.location.href = `/pages/updateAppointment.html?${queryString}`;
-  }, 100);
+  window.location.href = `/pages/updateAppointment.html?${queryString}`;
 }
 
 
-// Search and Filter Listeners
-document.getElementById("searchBar").addEventListener("input", handleFilterChange);
-document.getElementById("appointmentFilter").addEventListener("change", handleFilterChange);
+/* ============================================================
+   SEARCH + FILTER
+============================================================ */
+
+document.getElementById("searchBar")
+  ?.addEventListener("input", handleFilterChange);
+
+document.getElementById("appointmentFilter")
+  ?.addEventListener("change", handleFilterChange);
 
 async function handleFilterChange() {
   const searchBarValue = document.getElementById("searchBar").value.trim();
   const filterValue = document.getElementById("appointmentFilter").value;
 
-  const name = searchBarValue || null;
-  const condition = filterValue === "allAppointments" ? null : filterValue || null;
+  // Convert UI values properly
+  const name = searchBarValue ? searchBarValue : null;
+  const condition =
+    filterValue === "allAppointments" ? null : filterValue;
 
   try {
-    const response = await filterAppointments(condition, name, token);
-    const appointments = response?.appointments || [];
-    filteredAppointments = appointments.filter(app => app.patientId === patientId);
+    // If BOTH empty → show all immediately (no API call)
+    if (!condition && !name) {
+      renderAppointments(allAppointments);
+      return;
+    }
+
+    const appointments = await filterAppointments(condition, name, token);
+
+    if (!appointments || appointments.length === 0) {
+      renderAppointments([]);
+      return;
+    }
+
+    filteredAppointments =
+      appointments.filter(app => app.patientId === patientId);
 
     renderAppointments(filteredAppointments);
+
   } catch (error) {
     console.error("Failed to filter appointments:", error);
-    alert("❌ An error occurred while filtering appointments.");
+
+    // fallback to all appointments
+    renderAppointments(allAppointments);
   }
 }
-
