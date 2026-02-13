@@ -10,7 +10,7 @@ import { API_BASE_URL } from "../config/config.js";
 // API Endpoints
 // ==============================
 
-const ADMIN_API = API_BASE_URL + "/admin";
+const ADMIN_API = API_BASE_URL + "/admin/";
 const DOCTOR_API = API_BASE_URL + "/doctor/login";
 
 // ==============================
