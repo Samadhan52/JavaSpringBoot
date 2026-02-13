@@ -1,11 +1,11 @@
 // patientAppointment.js
-import { getPatientAppointments, getPatientData, filterAppointments } from "./services/patientServices.js";
+import { getPatientAppointments, getPatientData} from "./services/patientServices.js";
 
 const tableBody = document.getElementById("patientTableBody");
 const token = localStorage.getItem("token");
 
 let allAppointments = [];
-
+let currentFilterValue = "future";
 let patientId = null;
 
 document.addEventListener("DOMContentLoaded", initializePage);
@@ -43,7 +43,11 @@ function renderAppointments(appointments) {
 
   appointments.forEach(appointment => {
     const tr = document.createElement("tr");
-
+const isUpcomingAppointment = isUpcoming(appointment);
+    const isEditable =
+      currentFilterValue === "future" &&
+      appointment.status == 0 &&
+      isUpcomingAppointment;
     tr.innerHTML = `
       <td>${appointment.patientName || "You"}</td>
       <td>${appointment.doctorName}</td>
@@ -51,7 +55,7 @@ function renderAppointments(appointments) {
       <td>${appointment.appointmentTimeOnly}</td>
       <td>
         ${
-          appointment.status == 0
+           isEditable
             ? `<img src="../assets/images/edit/edit.png"
                  alt="Edit"
                  class="edit-btn"
@@ -61,7 +65,7 @@ function renderAppointments(appointments) {
       </td>
     `;
 
-    if (appointment.status == 0) {
+    if (isEditable) {
       tr.querySelector(".edit-btn")
         ?.addEventListener("click", () => redirectToUpdatePage(appointment));
     }
@@ -97,31 +101,25 @@ document.getElementById("appointmentFilter")
 
 async function handleFilterChange() {
   const searchBarValue = document.getElementById("searchBar").value.trim();
-  const filterValue = document.getElementById("appointmentFilter").value;
+  currentFilterValue = document.getElementById("appointmentFilter").value;
 
-  // Convert UI values properly
-  const name = searchBarValue ? searchBarValue : null;
-  const condition =
-    filterValue === "allAppointments" ? null : filterValue;
+  let appointmentsToRender = [...allAppointments];
 
-  try {
-    // If BOTH empty → show all immediately (no API call)
-    if (!condition && !name) {
-      renderAppointments(allAppointments);
-      return;
-    }
+  if (currentFilterValue === "future") {
+    appointmentsToRender = appointmentsToRender.filter(isUpcoming);
+  } else if (currentFilterValue === "past") {
+    appointmentsToRender = appointmentsToRender.filter(app => !isUpcoming(app));
+  }
+    if (searchBarValue) {
+    const query = searchBarValue.toLowerCase();
+    appointmentsToRender = appointmentsToRender.filter(app =>
+      `${app.patientName || "You"}`.toLowerCase().includes(query) ||
+      `${app.doctorName || ""}`.toLowerCase().includes(query)
+    );
+  }
 
-    const appointments = await filterAppointments(condition, name, token);
-
-    if (!appointments || appointments.length === 0) {
-      renderAppointments([]);
-      return;
-    }
-
-    const filteredAppointments =
-      appointments.filter(app => app.patientId === patientId);
-
-    renderAppointments(filteredAppointments);
+    try {
+    renderAppointments(appointmentsToRender);
 
   } catch (error) {
     console.error("Failed to filter appointments:", error);
@@ -129,4 +127,12 @@ async function handleFilterChange() {
     // fallback to all appointments
     renderAppointments(allAppointments);
   }
+}
+
+function isUpcoming(appointment) {
+  const appointmentDateTime = new Date(
+    `${appointment.appointmentDate}T${appointment.appointmentTimeOnly}`
+  );
+
+  return appointmentDateTime.getTime() > Date.now();
 }
