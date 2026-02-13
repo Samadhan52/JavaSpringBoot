@@ -60,9 +60,7 @@ async function filterDoctorsOnChange() {
     const time = document.getElementById("filterTime")?.value || null;
     const specialty = document.getElementById("filterSpecialty")?.value || null;
 
-    const response = await filterDoctors(name, time, specialty);
-    const doctors = response?.doctors || [];
-
+     const doctors = await filterDoctors(name, time, specialty);
     renderDoctorCards(doctors);
 
   } catch (error) {

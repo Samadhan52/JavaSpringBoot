@@ -163,15 +163,27 @@ public class DoctorController {
     /**
      * 7️⃣ Filter Doctors
      */
-    @GetMapping("/filter/{name}/{time}/{speciality}")
-    public ResponseEntity<Map<String, Object>> filterDoctors(
-            @PathVariable String name,
-            @PathVariable String time,
-            @PathVariable String speciality) {
+    @GetMapping("/filter")
+    public ResponseEntity<Map<String, Object>> filterDoctorsByQuery(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String time,
+            @RequestParam(required = false) String specialty) {
 
         Map<String, Object> result =
-                commonService.filterDoctor(name, speciality, time);
+                commonService.filterDoctor(normalizeFilterValue(name),
+                        normalizeFilterValue(specialty),
+                        normalizeFilterValue(time));
 
         return ResponseEntity.ok(result);
     }
+    private String normalizeFilterValue(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value;
+    }
 }
+
+    
+

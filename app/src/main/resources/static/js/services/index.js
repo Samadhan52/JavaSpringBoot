@@ -4,7 +4,7 @@
 
 import { openModal } from "../components/modals.js";
 import { API_BASE_URL } from "../config/config.js";
-import { selectRole } from "../render.js";
+//import { selectRole } from "../render.js";
 
 // ==============================
 // API Endpoints
@@ -19,17 +19,24 @@ const DOCTOR_API = API_BASE_URL + "/doctor/login";
 
 window.onload = function () {
 
-  const adminBtn = document.getElementById("adminLogin");
+  const adminBtn = document.getElementById("adminBtn");
   if (adminBtn) {
     adminBtn.addEventListener("click", () => {
       openModal("adminLogin");
     });
   }
 
-  const doctorBtn = document.getElementById("doctorLogin");
+  const doctorBtn = document.getElementById("doctorBtn");
   if (doctorBtn) {
     doctorBtn.addEventListener("click", () => {
       openModal("doctorLogin");
+    });
+  }
+
+  const patientBtn = document.getElementById("patientBtn");
+  if (patientBtn) {
+    patientBtn.addEventListener("click", () => {
+      window.selectRole("patient");
     });
   }
 
@@ -41,8 +48,8 @@ window.onload = function () {
 
 window.adminLoginHandler = async function () {
 
-  const username = document.getElementById("adminUsername")?.value;
-  const password = document.getElementById("adminPassword")?.value;
+  const username = document.getElementById("username")?.value;
+  const password = document.getElementById("password")?.value;
 
   const admin = { username, password };
 
@@ -60,7 +67,7 @@ window.adminLoginHandler = async function () {
       const data = await response.json();
 
       localStorage.setItem("token", data.token);
-      selectRole("admin");
+      window.selectRole("admin");
 
     } else {
       alert("Invalid credentials!");
@@ -79,8 +86,8 @@ window.adminLoginHandler = async function () {
 
 window.doctorLoginHandler = async function () {
 
-  const email = document.getElementById("doctorEmail")?.value;
-  const password = document.getElementById("doctorPassword")?.value;
+  const email = document.getElementById("email")?.value;
+  const password = document.getElementById("password")?.value;
 
   const doctor = { email, password };
 
@@ -98,7 +105,7 @@ window.doctorLoginHandler = async function () {
       const data = await response.json();
 
       localStorage.setItem("token", data.token);
-      selectRole("doctor");
+      window.selectRole("doctor");
 
     } else {
       alert("Invalid credentials!");

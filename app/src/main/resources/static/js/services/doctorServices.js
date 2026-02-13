@@ -115,7 +115,9 @@ export async function filterDoctors(name = "", time = "", specialty = "") {
     if (time) params.append("time", time);
     if (specialty) params.append("specialty", specialty);
 
-    const response = await fetch(`${DOCTOR_API}/filter?${params.toString()}`);
+   const query = params.toString();
+    const url = query ? `${DOCTOR_API}/filter?${query}` : `${DOCTOR_API}/filter`;
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error("Failed to filter doctors");
@@ -123,7 +125,7 @@ export async function filterDoctors(name = "", time = "", specialty = "") {
 
     const data = await response.json();
 
-    return data.doctors || data || [];
+    return data?.doctors || [];
 
   } catch (error) {
     console.error("Filter doctors error:", error);
