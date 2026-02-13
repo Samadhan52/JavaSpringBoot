@@ -10,8 +10,46 @@ import { API_BASE_URL } from "../config/config.js";
 // API Endpoints
 // ==============================
 
-const ADMIN_API = API_BASE_URL + "/admin/login";
-const DOCTOR_API = API_BASE_URL + "/doctor/login";
+const ADMIN_API = "/admin/login";
+const DOCTOR_API = "/doctor/login";
+
+function buildApiCandidates(url) {
+  const candidates = [];
+
+  const addCandidate = (candidate) => {
+    if (!candidate || candidates.includes(candidate)) {
+      return;
+    }
+    candidates.push(candidate);
+  };
+
+  if (API_BASE_URL) {
+    addCandidate(`${API_BASE_URL}${url}`);
+    addCandidate(`${API_BASE_URL}/api${url}`);
+    return candidates;
+  }
+
+  // Root-based routes (work when app is served at `/`).
+  addCandidate(url);
+  addCandidate(`/api${url}`);
+
+  // Relative routes (work when app is behind a proxy path prefix).
+  const pagePath = window.location.pathname;
+  const pageDir = pagePath.endsWith("/")
+    ? pagePath
+    : pagePath.slice(0, pagePath.lastIndexOf("/") + 1);
+  const normalizedDir = pageDir === "/" ? "" : pageDir.replace(/\/$/, "");
+
+  addCandidate(`${normalizedDir}${url}`);
+  addCandidate(`${normalizedDir}/api${url}`);
+
+  // Extra fallback without leading slash.
+  if (url.startsWith("/")) {
+    addCandidate(url.slice(1));
+  }
+
+  return candidates;
+}
 
 async function postWithApiFallback(url, payload) {
   const request = {
@@ -22,11 +60,25 @@ async function postWithApiFallback(url, payload) {
     body: JSON.stringify(payload)
   };
 
-  let response = await fetch(url, request);
+  const candidateUrls = buildApiCandidates(url);
 
   // Some deployments expose backend routes under `/api/*`.
-  if (response.status === 404 && API_BASE_URL === "" && !url.startsWith("/api/")) {
-    response = await fetch(`/api${url}`, request);
+  if (API_BASE_URL === "" && !url.startsWith("/api/")) {
+    candidateUrls.push(`/api${url}`);
+  }
+
+  // If the app is deployed behind a path prefix, a relative URL works better
+  // than root-relative (`/doctor/login`).
+  if (url.startsWith("/")) {
+    candidateUrls.push(url.slice(1));
+  }
+
+  let response;
+  for (const candidateUrl of candidateUrls) {
+    response = await fetch(candidateUrl, request);
+    if (response.status !== 404) {
+      break;
+    }
   }
 
   return response;
