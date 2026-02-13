@@ -131,7 +131,9 @@ public class AppointmentService {
 
     List<Appointment> appointments;
 
-    if (patientName != null && !patientName.isBlank()) {
+    if (patientName != null
+            && !patientName.isBlank()
+            && !"null".equalsIgnoreCase(patientName)) {
         appointments =
                 appointmentRepository
                         .findByDoctorIdAndPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(
