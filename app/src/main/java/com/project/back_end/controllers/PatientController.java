@@ -34,7 +34,7 @@ public class PatientController {
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "patient");
 
-        if (tokenValidation != null) {
+        if (!tokenValidation.getStatusCode().is2xxSuccessful()) {
             return tokenValidation;
         }
 
@@ -89,7 +89,7 @@ public class PatientController {
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "patient");
 
-        if (tokenValidation != null) {
+        if (!tokenValidation.getStatusCode().is2xxSuccessful()) {
             return tokenValidation;
         }
 
@@ -109,7 +109,7 @@ public class PatientController {
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "patient");
 
-        if (tokenValidation != null) {
+        if (!tokenValidation.getStatusCode().is2xxSuccessful()) {
             return tokenValidation;
         }
 

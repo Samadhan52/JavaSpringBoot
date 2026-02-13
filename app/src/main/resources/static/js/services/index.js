@@ -10,8 +10,27 @@ import { API_BASE_URL } from "../config/config.js";
 // API Endpoints
 // ==============================
 
-const ADMIN_API = API_BASE_URL + "/admin/";
+const ADMIN_API = API_BASE_URL + "/admin/login";
 const DOCTOR_API = API_BASE_URL + "/doctor/login";
+
+async function postWithApiFallback(url, payload) {
+  const request = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  };
+
+  let response = await fetch(url, request);
+
+  // Some deployments expose backend routes under `/api/*`.
+  if (response.status === 404 && API_BASE_URL === "" && !url.startsWith("/api/")) {
+    response = await fetch(`/api${url}`, request);
+  }
+
+  return response;
+}
 
 // ==============================
 // Setup Button Event Listeners
@@ -55,13 +74,7 @@ window.adminLoginHandler = async function () {
 
   try {
 
-    const response = await fetch(ADMIN_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(admin)
-    });
+    const response = await postWithApiFallback(ADMIN_API, admin);
 
     if (response.ok) {
       const data = await response.json();
@@ -93,13 +106,7 @@ window.doctorLoginHandler = async function () {
 
   try {
 
-    const response = await fetch(DOCTOR_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(doctor)
-    });
+    const response = await postWithApiFallback(DOCTOR_API, doctor);
 
     if (response.ok) {
       const data = await response.json();

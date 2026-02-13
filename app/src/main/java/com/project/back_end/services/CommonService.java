@@ -55,7 +55,8 @@ public class CommonService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     
-        return null;  // token valid
+        response.put("message", "Token valid");
+        return ResponseEntity.ok(response);
     }
     
 

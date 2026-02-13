@@ -33,7 +33,7 @@ public class AppointmentController {
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "doctor");
 
-        if (tokenValidation != null) {
+        if (!tokenValidation.getStatusCode().is2xxSuccessful()) {
             return tokenValidation;
         }
 
@@ -52,7 +52,7 @@ public class AppointmentController {
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "patient");
                 
-        if (tokenValidation != null) {
+        if (!tokenValidation.getStatusCode().is2xxSuccessful()) {
             return tokenValidation;
         }
 
@@ -84,7 +84,7 @@ System.out.println("Time: " + appointment.getAppointmentTime());
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "patient");
 
-        if (tokenValidation != null) {
+        if (!tokenValidation.getStatusCode().is2xxSuccessful()) {
             return tokenValidation;
         }
 
@@ -99,7 +99,7 @@ System.out.println("Time: " + appointment.getAppointmentTime());
         ResponseEntity<Map<String, String>> tokenValidation =
                 commonService.validateToken(token, "patient");
 
-        if (tokenValidation != null) {
+        if (!tokenValidation.getStatusCode().is2xxSuccessful()) {
             return tokenValidation;
         }
 

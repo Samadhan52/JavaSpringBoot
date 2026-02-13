@@ -27,8 +27,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Search + Filter Event Listeners
   document.getElementById("searchBar")?.addEventListener("input", filterDoctorsOnChange);
-  document.getElementById("filterTime")?.addEventListener("change", filterDoctorsOnChange);
-  document.getElementById("filterSpecialty")?.addEventListener("change", filterDoctorsOnChange);
+  document.getElementById("sortTime")?.addEventListener("change", filterDoctorsOnChange);
+  document.getElementById("specialtyFilter")?.addEventListener("change", filterDoctorsOnChange);
 });
 
 
@@ -54,6 +54,10 @@ async function loadDoctorCards() {
 
 function renderDoctorCards(doctors) {
   const contentDiv = document.getElementById("content");
+  if (!contentDiv) {
+    return;
+  }
+
   contentDiv.innerHTML = "";
 
   if (!doctors || doctors.length === 0) {
@@ -76,8 +80,8 @@ function renderDoctorCards(doctors) {
 async function filterDoctorsOnChange() {
   try {
     const name = document.getElementById("searchBar")?.value.trim() || null;
-    const time = document.getElementById("filterTime")?.value || null;
-    const specialty = document.getElementById("filterSpecialty")?.value || null;
+    const time = document.getElementById("sortTime")?.value || null;
+    const specialty = document.getElementById("specialtyFilter")?.value || null;
 
     const doctors = await filterDoctors(name, time, specialty);
     renderDoctorCards(doctors);
@@ -105,11 +109,11 @@ window.adminAddDoctor = async function () {
     }
 
     // Collect form values
-    const name = document.getElementById("docName")?.value.trim();
-    const email = document.getElementById("docEmail")?.value.trim();
-    const password = document.getElementById("docPassword")?.value.trim();
-    const mobile = document.getElementById("docMobile")?.value.trim();
-    const specialty = document.getElementById("docSpecialty")?.value;
+    const name = document.getElementById("doctorName")?.value.trim();
+    const email = document.getElementById("doctorEmail")?.value.trim();
+    const password = document.getElementById("doctorPassword")?.value.trim();
+    const mobile = document.getElementById("doctorPhone")?.value.trim();
+    const specialty = document.getElementById("specialization")?.value;
 
     // Collect availability (checkboxes)
     const availabilityCheckboxes = document.querySelectorAll(

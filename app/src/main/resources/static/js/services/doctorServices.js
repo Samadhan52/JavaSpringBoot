@@ -33,11 +33,10 @@ export async function getDoctors() {
    ===================================================== */
 export async function deleteDoctor(id, token) {
   try {
-    const response = await fetch(`${DOCTOR_API}/${id}`, {
+    const response = await fetch(`${DOCTOR_API}/${id}/${token}`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json"
       }
     });
 
@@ -70,13 +69,18 @@ export async function deleteDoctor(id, token) {
    ===================================================== */
 export async function saveDoctor(doctor, token) {
   try {
-    const response = await fetch(DOCTOR_API, {
+    const payload = {
+      ...doctor,
+      phone: doctor.mobile,
+      availableTimes: doctor.availability
+    };
+    const response = await fetch(`${DOCTOR_API}/${token}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        
       },
-      body: JSON.stringify(doctor)
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();

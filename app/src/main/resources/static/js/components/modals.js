@@ -75,9 +75,7 @@ export function openModal(type) {
   document.getElementById('modal-body').innerHTML = modalContent;
   document.getElementById('modal').style.display = 'block';
 
-  document.getElementById('closeModal').onclick = () => {
-    document.getElementById('modal').style.display = 'none';
-  };
+  document.getElementById('closeModal').onclick = closeModal;
 
   if (type === "patientSignup") {
     document.getElementById("signupBtn").addEventListener("click", signupPatient);
@@ -98,4 +96,8 @@ export function openModal(type) {
   if (type === 'doctorLogin') {
     document.getElementById('doctorLoginBtn').addEventListener('click', doctorLoginHandler);
   }
+}
+
+export function closeModal() {
+  document.getElementById('modal').style.display = 'none';
 }
