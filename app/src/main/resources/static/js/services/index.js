@@ -62,17 +62,6 @@ async function postWithApiFallback(url, payload) {
 
   const candidateUrls = buildApiCandidates(url);
 
-  // Some deployments expose backend routes under `/api/*`.
-  if (API_BASE_URL === "" && !url.startsWith("/api/")) {
-    candidateUrls.push(`/api${url}`);
-  }
-
-  // If the app is deployed behind a path prefix, a relative URL works better
-  // than root-relative (`/doctor/login`).
-  if (url.startsWith("/")) {
-    candidateUrls.push(url.slice(1));
-  }
-
   let response;
   for (const candidateUrl of candidateUrls) {
     response = await fetch(candidateUrl, request);
