@@ -5,7 +5,7 @@ const tableBody = document.getElementById("patientTableBody");
 const token = localStorage.getItem("token");
 
 let allAppointments = [];
-let filteredAppointments = [];
+
 let patientId = null;
 
 document.addEventListener("DOMContentLoaded", initializePage);
@@ -24,7 +24,7 @@ async function initializePage() {
     // Store all appointments
     allAppointments = appointmentData.filter(app => app.patientId === patientId);
 
-    renderAppointments(allAppointments);
+    await handleFilterChange();
 
   } catch (error) {
     console.error("Error loading appointments:", error);
@@ -118,7 +118,7 @@ async function handleFilterChange() {
       return;
     }
 
-    filteredAppointments =
+    const filteredAppointments =
       appointments.filter(app => app.patientId === patientId);
 
     renderAppointments(filteredAppointments);
