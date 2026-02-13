@@ -143,7 +143,10 @@ window.doctorLoginHandler = async function () {
   const email = document.getElementById("email")?.value;
   const password = document.getElementById("password")?.value;
 
-  const doctor = { email, password };
+  const doctor = {
+    identifier: email,
+    password
+  };
 
   try {
 

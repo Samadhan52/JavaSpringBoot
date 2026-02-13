@@ -108,10 +108,14 @@ async function loadAppointments() {
         id: appointment.patient?.id,
         name: appointment.patient?.name,
         email: appointment.patient?.email,
-        mobile: appointment.patient?.mobile
+        mobile: appointment.patient?.phone
       };
 
-      const row = createPatientRow(patient, appointment);
+      const row = createPatientRow(
+        patient,
+        appointment.id,
+        appointment.doctor?.id
+      );
       patientTableBody.appendChild(row);
     });
 
